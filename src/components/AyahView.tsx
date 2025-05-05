@@ -19,9 +19,10 @@ export function AyahView({ ayah, translation }: AyahViewProps) {
   const { showTranslation, arabicFontSize, translationFontSize } = useSettingsStore();
   const { toast } = useToast();
   
-  // Make sure ayah.surah exists before accessing its properties
+  // Safety check - if ayah or ayah.surah is undefined, return null
   if (!ayah || !ayah.surah) {
-    return null; // Return null or a placeholder if ayah or ayah.surah is undefined
+    console.warn("Missing ayah data in AyahView");
+    return null;
   }
   
   const isCurrentlyPlaying = 
@@ -35,6 +36,7 @@ export function AyahView({ ayah, translation }: AyahViewProps) {
     if (isCurrentlyPlaying) {
       pause();
     } else {
+      console.log("Playing audio from AyahView:", ayah.surah.number, ayah.numberInSurah);
       play(ayah.surah.number, ayah.numberInSurah);
     }
   };

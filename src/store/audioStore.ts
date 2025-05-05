@@ -33,21 +33,39 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       set({ isLoading: true });
       const reciter = useSettingsStore.getState().reciter;
       const audioUrl = quranAPI.getAyahAudioUrl(surahNumber, ayahNumber, reciter);
+      console.log("Audio URL:", audioUrl);
       
       const newAudio = new Audio(audioUrl);
+      
+      // Add error handling for audio loading
+      newAudio.addEventListener('error', (e) => {
+        console.error("Error loading audio:", e);
+        set({ isLoading: false });
+      });
+      
       newAudio.addEventListener('ended', () => {
         get().playNext();
       });
 
-      await newAudio.play();
-      
-      set({
-        audio: newAudio,
-        isPlaying: true,
-        currentSurah: surahNumber,
-        currentAyah: ayahNumber,
-        isLoading: false,
-      });
+      // Use a promise to ensure audio is loaded
+      const playPromise = newAudio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log("Audio playing successfully");
+            set({
+              audio: newAudio,
+              isPlaying: true,
+              currentSurah: surahNumber,
+              currentAyah: ayahNumber,
+              isLoading: false,
+            });
+          })
+          .catch(error => {
+            console.error("Error playing audio:", error);
+            set({ isLoading: false });
+          });
+      }
     } catch (error) {
       console.error('Error playing audio:', error);
       set({ isLoading: false });

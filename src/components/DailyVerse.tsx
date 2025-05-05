@@ -93,7 +93,7 @@ export function DailyVerse() {
     if (!dailyVerse || !dailyVerse.surah) return;
     
     // Use the correct ayah number for audio playback
-    console.log("Playing audio for surah:", dailyVerse.surah.number, "ayah:", dailyVerse.numberInSurah);
+    console.log("Playing daily verse audio for surah:", dailyVerse.surah.number, "ayah:", dailyVerse.numberInSurah);
     play(dailyVerse.surah.number, dailyVerse.numberInSurah);
   };
   
