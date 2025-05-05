@@ -25,7 +25,9 @@ export function DailyVerse() {
         // Generate a "random" surah and ayah based on the date
         // This ensures the same verse appears on the same day for all users
         const today = new Date();
-        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+        const startOfYear = new Date(today.getFullYear(), 0, 0);
+        const diff = Number(today) - Number(startOfYear);
+        const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
         
         // Use the day of year to pick a surah (1-114)
         let surahNumber = (dayOfYear % 114) + 1;
