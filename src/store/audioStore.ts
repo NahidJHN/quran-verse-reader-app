@@ -72,6 +72,12 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       return;
     }
 
+    //scroll to current ayah
+    const ayahElement = document.getElementById(`ayah-${surahNumber}-${ayahNumber}`) as HTMLElement;
+    if (ayahElement) {
+      ayahElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
     const { audio: currentAudio, volume } = get(); // Get current audio instance and volume
     console.log(`Attempting to play: Surah ${surahNumber}, Ayah ${ayahNumber}`);
 

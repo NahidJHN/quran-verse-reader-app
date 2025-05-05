@@ -51,7 +51,7 @@ export function FooterPlayer() {
       setVolume(0.75); // Unmute to default or previous volume
     }
   };
-
+  console.log(currentAyah);
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border p-2 md:p-4">
       <div className="container flex items-center justify-between gap-4">
@@ -68,7 +68,12 @@ export function FooterPlayer() {
             Surah {currentSurah}
           </Link>
           <span className="text-muted-foreground">•</span>
-          <span className="truncate">Ayah {currentAyah}</span> {/* Added truncate */}
+          <Link
+            to={`/surah/${currentSurah}?ayah=${currentAyah}`}
+            className="text-primary hover:text-gold transition-colors font-medium truncate" // Added truncate
+          >
+            Ayah {currentAyah}
+          </Link>
         </div>
         {/* Center: Playback Controls */}
         <div className="flex items-center gap-1 md:gap-2 flex-grow justify-center">

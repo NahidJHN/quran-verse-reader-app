@@ -131,13 +131,13 @@ export default function SurahPage() {
       <div className="bg-card rounded-xl border border-border divide-y divide-border">
         {surah.ayahs.map((ayah) => {
           if (!ayah || !ayah.surah) return null;
-
           const translation = translations.find((t) => t.numberInSurah === ayah.numberInSurah);
           const isTargetAyah = ayahParam && parseInt(ayahParam) === ayah.numberInSurah;
 
           return (
             <div
               key={ayah.number}
+              id={`ayah-${surah.number}-${ayah.numberInSurah}`}
               ref={isTargetAyah ? targetAyahRef : null}
               className={`transition-colors ${isTargetAyah ? "bg-accent/10" : "hover:bg-muted/5"}`}
             >
