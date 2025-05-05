@@ -26,7 +26,7 @@ export function DailyVerse() {
         // This ensures the same verse appears on the same day for all users
         const today = new Date();
         const startOfYear = new Date(today.getFullYear(), 0, 0);
-        const diff = Number(today) - Number(startOfYear);
+        const diff = today.getTime() - startOfYear.getTime();
         const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
         
         // Use the day of year to pick a surah (1-114)
@@ -91,6 +91,9 @@ export function DailyVerse() {
   
   const handlePlay = () => {
     if (!dailyVerse || !dailyVerse.surah) return;
+    
+    // Use the correct ayah number for audio playback
+    console.log("Playing audio for surah:", dailyVerse.surah.number, "ayah:", dailyVerse.numberInSurah);
     play(dailyVerse.surah.number, dailyVerse.numberInSurah);
   };
   

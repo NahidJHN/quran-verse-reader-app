@@ -84,7 +84,8 @@ export const quranAPI = {
 
   // Get audio URL for a specific ayah
   getAyahAudioUrl: (surahNumber: number, ayahNumber: number, reciter: string = 'ar.alafasy'): string => {
-    return `https://cdn.islamic.network/quran/audio/128/${reciter}/${getAyahNumberInQuran(surahNumber, ayahNumber)}.mp3`;
+    // Use the absolute number directly instead of calculating it
+    return `https://cdn.islamic.network/quran/audio/128/${reciter}/${ayahNumber}.mp3`;
   },
 
   // Get audio URL for a specific surah
@@ -94,11 +95,10 @@ export const quranAPI = {
 };
 
 // Helper function to convert surah and ayah numbers to absolute ayah number in Quran
+// This function is not used anymore, but kept for reference
 function getAyahNumberInQuran(surahNumber: number, ayahNumberInSurah: number): number {
-  // This is a simplified calculation, might need adjustment based on API requirements
-  // In a real application, you'd use a mapping or calculation based on the actual structure
-  // For demo purposes, we'll use this simple approximation
-  return (surahNumber * 1000) + ayahNumberInSurah;
+  // This calculation was causing issues, so we now use the absolute ayah number directly
+  return ayahNumberInSurah;
 }
 
 export default quranAPI;

@@ -17,6 +17,7 @@ export default function SurahPage() {
   const [surah, setSurah] = useState<SurahDetail | null>(null);
   const [translations, setTranslations] = useState<Translation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Reference to target ayah for scrolling
@@ -27,15 +28,25 @@ export default function SurahPage() {
       if (!surahId) return;
       
       setIsLoading(true);
+      setError(null);
       try {
         const surahNumber = parseInt(surahId);
+        console.log("Fetching surah:", surahNumber);
         const surahData = await quranAPI.getSurah(surahNumber);
+        console.log("Surah data received:", surahData);
+        
         const translationData = await quranAPI.getTranslation(surahNumber);
+        console.log("Translation data received", translationData);
+        
+        if (!surahData || !surahData.ayahs) {
+          throw new Error("Invalid surah data received");
+        }
         
         setSurah(surahData);
-        setTranslations(translationData);
+        setTranslations(translationData || []);
       } catch (error) {
         console.error("Error fetching surah data:", error);
+        setError("Failed to load surah. Please try again.");
         toast({
           title: "Error",
           description: "Failed to load surah. Please try again.",
@@ -76,10 +87,17 @@ export default function SurahPage() {
     );
   }
   
-  if (!surah) {
+  if (error || !surah) {
     return (
       <div className="container py-6">
-        <p className="text-center text-muted-foreground">Surah not found.</p>
+        <p className="text-center text-muted-foreground">
+          {error || "Surah not found."}
+        </p>
+        <div className="flex justify-center mt-4">
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
