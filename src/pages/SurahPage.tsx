@@ -115,23 +115,30 @@ export default function SurahPage() {
       </div>
       
       <div className="bg-card rounded-lg border border-border overflow-hidden">
-        {surah.ayahs.map((ayah) => {
-          const translation = translations.find(t => t.numberInSurah === ayah.numberInSurah);
-          const isTargetAyah = ayahParam && parseInt(ayahParam) === ayah.numberInSurah;
-          
-          return (
-            <div
-              key={ayah.number}
-              ref={isTargetAyah ? targetAyahRef : null}
-              className={isTargetAyah ? "bg-accent/10" : ""}
-            >
-              <AyahView
-                ayah={ayah}
-                translation={translation}
-              />
-            </div>
-          );
-        })}
+        {surah.ayahs && surah.ayahs.length > 0 ? (
+          surah.ayahs.map((ayah) => {
+            // Ensure ayah has all required properties before rendering
+            if (!ayah || !ayah.surah) return null;
+            
+            const translation = translations.find(t => t.numberInSurah === ayah.numberInSurah);
+            const isTargetAyah = ayahParam && parseInt(ayahParam) === ayah.numberInSurah;
+            
+            return (
+              <div
+                key={ayah.number}
+                ref={isTargetAyah ? targetAyahRef : null}
+                className={isTargetAyah ? "bg-accent/10" : ""}
+              >
+                <AyahView
+                  ayah={ayah}
+                  translation={translation}
+                />
+              </div>
+            );
+          })
+        ) : (
+          <p className="p-4 text-center text-muted-foreground">No verses found.</p>
+        )}
       </div>
     </div>
   );

@@ -19,6 +19,11 @@ export function AyahView({ ayah, translation }: AyahViewProps) {
   const { showTranslation, arabicFontSize, translationFontSize } = useSettingsStore();
   const { toast } = useToast();
   
+  // Make sure ayah.surah exists before accessing its properties
+  if (!ayah || !ayah.surah) {
+    return null; // Return null or a placeholder if ayah or ayah.surah is undefined
+  }
+  
   const isCurrentlyPlaying = 
     isPlaying && 
     currentSurah === ayah.surah.number && 
