@@ -1,0 +1,156 @@
+
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { quranAPI, Ayah, Translation } from "@/services/quranAPI";
+import { Button } from "@/components/ui/button";
+import { Play, Bookmark, BookmarkCheck } from "lucide-react";
+import { useAudioStore } from "@/store/audioStore";
+import { useBookmarkStore } from "@/store/bookmarkStore";
+import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+
+export function DailyVerse() {
+  const [dailyVerse, setDailyVerse] = useState<Ayah | null>(null);
+  const [translation, setTranslation] = useState<Translation | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { play } = useAudioStore();
+  const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchDailyVerse = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Generate a "random" surah and ayah based on the date
+        // This ensures the same verse appears on the same day for all users
+        const today = new Date();
+        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+        
+        // Use the day of year to pick a surah (1-114)
+        let surahNumber = (dayOfYear % 114) + 1;
+        
+        // Fetch the surah to get its length
+        const surah = await quranAPI.getSurah(surahNumber);
+        
+        // Pick an ayah from the surah
+        const ayahIndex = dayOfYear % surah.numberOfAyahs;
+        const ayah = surah.ayahs[ayahIndex];
+        
+        // Fetch the translation
+        const translations = await quranAPI.getTranslation(surahNumber);
+        const translationText = translations[ayahIndex];
+        
+        setDailyVerse(ayah);
+        setTranslation(translationText);
+      } catch (error) {
+        console.error("Error fetching daily verse:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load daily verse. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDailyVerse();
+  }, [toast]);
+  
+  const handleBookmarkToggle = () => {
+    if (!dailyVerse) return;
+    
+    const surahNumber = dailyVerse.surah.number;
+    const ayahNumber = dailyVerse.numberInSurah;
+    
+    if (isBookmarked(surahNumber, ayahNumber)) {
+      removeBookmark(surahNumber, ayahNumber);
+      toast({
+        title: "Bookmark removed",
+        description: "Verse has been removed from your bookmarks",
+      });
+    } else {
+      addBookmark(surahNumber, ayahNumber);
+      toast({
+        title: "Bookmark added",
+        description: "Verse has been added to your bookmarks",
+      });
+    }
+  };
+  
+  const handlePlay = () => {
+    if (!dailyVerse) return;
+    play(dailyVerse.surah.number, dailyVerse.numberInSurah);
+  };
+  
+  if (isLoading || !dailyVerse) {
+    return (
+      <Card className="animate-pulse">
+        <CardHeader>
+          <CardTitle className="h-8 w-1/3 bg-muted rounded"></CardTitle>
+          <CardDescription className="h-4 w-1/2 bg-muted rounded"></CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-16 bg-muted rounded mb-4"></div>
+          <div className="h-12 bg-muted rounded"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  const isVerseBookmarked = isBookmarked(dailyVerse.surah.number, dailyVerse.numberInSurah);
+  
+  return (
+    <Card className="bg-card overflow-hidden border-gold/20">
+      <CardHeader className="bg-card/80 border-b border-border pb-2">
+        <CardTitle className="flex items-center justify-between">
+          <span>Verse of the Day</span>
+          <Link 
+            to={`/surah/${dailyVerse.surah.number}`} 
+            className="text-sm font-normal text-gold hover:text-gold-light transition-colors"
+          >
+            Surah {dailyVerse.surah.englishName}
+          </Link>
+        </CardTitle>
+        <CardDescription>
+          {dailyVerse.surah.englishNameTranslation} - Verse {dailyVerse.numberInSurah}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pt-4">
+        <p className="arabic-text text-2xl mb-4 leading-loose">
+          {dailyVerse.text}
+        </p>
+        {translation && (
+          <p className="text-sm text-muted-foreground mt-2 mb-4 italic">
+            "{translation.text}"
+          </p>
+        )}
+        <div className="flex justify-end gap-2 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBookmarkToggle}
+            className={isVerseBookmarked ? "text-gold border-gold" : ""}
+          >
+            {isVerseBookmarked ? (
+              <BookmarkCheck className="h-4 w-4 mr-2" />
+            ) : (
+              <Bookmark className="h-4 w-4 mr-2" />
+            )}
+            {isVerseBookmarked ? "Bookmarked" : "Bookmark"}
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handlePlay}
+            className="bg-gold hover:bg-gold-dark"
+          >
+            <Play className="h-4 w-4 mr-2" />
+            Listen
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
