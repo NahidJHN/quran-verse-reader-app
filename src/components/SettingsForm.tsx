@@ -1,4 +1,3 @@
-
 import { useSettingsStore } from "@/store/settingsStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -18,21 +17,16 @@ export function SettingsForm() {
     setTranslationFontSize,
     toggleTranslation,
     setTranslationLanguage,
-    setReciter
+    setReciter,
   } = useSettingsStore();
 
   const translations = [
     { value: "en.asad", label: "Muhammad Asad (English)" },
-    { value: "en.pickthall", label: "Pickthall (English)" },
-    { value: "en.sahih", label: "Sahih International (English)" },
-    { value: "fr.hamidullah", label: "Hamidullah (French)" },
-    { value: "tr.ates", label: "Süleyman Ateş (Turkish)" },
+    { value: "en.bn.bengali", label: "Bangali" },
   ];
 
   const reciters = [
     { value: "ar.alafasy", label: "Mishary Rashid Alafasy" },
-    { value: "ar.abdulbasitmurattal", label: "Abdul Basit" },
-    { value: "ar.abdurrahmaansudais", label: "Abdur-Rahman As-Sudais" },
     { value: "ar.hudhaify", label: "Ali Al-Hudhaify" },
     { value: "ar.minshawi", label: "Mohamed Siddiq Al-Minshawi" },
   ];
@@ -49,12 +43,12 @@ export function SettingsForm() {
             <Label htmlFor="theme">Theme</Label>
             <ThemeToggle />
           </div>
-          
+
           <div className="space-y-2">
             <Label>Arabic Font Size</Label>
             <RadioGroup
               value={arabicFontSize}
-              onValueChange={(value) => setArabicFontSize(value as 'small' | 'medium' | 'large')}
+              onValueChange={(value) => setArabicFontSize(value as "small" | "medium" | "large")}
               className="flex space-x-2"
             >
               <div className="flex items-center space-x-2">
@@ -71,12 +65,12 @@ export function SettingsForm() {
               </div>
             </RadioGroup>
           </div>
-          
+
           <div className="space-y-2">
             <Label>Translation Font Size</Label>
             <RadioGroup
               value={translationFontSize}
-              onValueChange={(value) => setTranslationFontSize(value as 'small' | 'medium' | 'large')}
+              onValueChange={(value) => setTranslationFontSize(value as "small" | "medium" | "large")}
               className="flex space-x-2"
             >
               <div className="flex items-center space-x-2">
@@ -95,7 +89,7 @@ export function SettingsForm() {
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Reading</CardTitle>
@@ -104,19 +98,12 @@ export function SettingsForm() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="show-translation">Show Translation</Label>
-            <Switch
-              id="show-translation"
-              checked={showTranslation}
-              onCheckedChange={toggleTranslation}
-            />
+            <Switch id="show-translation" checked={showTranslation} onCheckedChange={toggleTranslation} />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="translation">Translation</Label>
-            <Select
-              value={translationLanguage}
-              onValueChange={setTranslationLanguage}
-            >
+            <Select value={translationLanguage} onValueChange={setTranslationLanguage}>
               <SelectTrigger>
                 <SelectValue placeholder="Select translation" />
               </SelectTrigger>
@@ -129,13 +116,10 @@ export function SettingsForm() {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="reciter">Reciter</Label>
-            <Select
-              value={reciter}
-              onValueChange={setReciter}
-            >
+            <Select value={reciter} onValueChange={setReciter}>
               <SelectTrigger>
                 <SelectValue placeholder="Select reciter" />
               </SelectTrigger>
