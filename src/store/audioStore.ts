@@ -25,9 +25,16 @@ export const useAudioStore = create<AudioState>((set, get) => ({
 
   play: async (surahNumber: number, ayahNumber: number) => {
     try {
+      if (!surahNumber || !ayahNumber) {
+        console.error('Invalid surah or ayah number:', surahNumber, ayahNumber);
+        return;
+      }
+      
       const { audio: currentAudio } = get();
       if (currentAudio) {
         currentAudio.pause();
+        currentAudio.removeAttribute('src');
+        currentAudio.load();
       }
 
       set({ isLoading: true });
@@ -43,8 +50,15 @@ export const useAudioStore = create<AudioState>((set, get) => ({
         set({ isLoading: false });
       });
       
+      // Set up ended event before playing
       newAudio.addEventListener('ended', () => {
-        get().playNext();
+        setTimeout(() => get().playNext(), 500);
+      });
+      
+      // Set up canplaythrough event to detect when audio is ready
+      newAudio.addEventListener('canplaythrough', () => {
+        console.log("Audio can play through");
+        set({ isLoading: false });
       });
 
       // Use a promise to ensure audio is loaded

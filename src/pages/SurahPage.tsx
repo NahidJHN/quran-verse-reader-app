@@ -35,12 +35,25 @@ export default function SurahPage() {
         const surahData = await quranAPI.getSurah(surahNumber);
         console.log("Surah data received:", surahData);
         
-        const translationData = await quranAPI.getTranslation(surahNumber);
-        console.log("Translation data received", translationData);
-        
         if (!surahData || !surahData.ayahs) {
           throw new Error("Invalid surah data received");
         }
+        
+        // Make sure each ayah has the surah property
+        surahData.ayahs.forEach(ayah => {
+          if (!ayah.surah) {
+            ayah.surah = {
+              number: surahData.number,
+              name: surahData.name,
+              englishName: surahData.englishName,
+              englishNameTranslation: surahData.englishNameTranslation,
+              revelationType: surahData.revelationType
+            };
+          }
+        });
+        
+        const translationData = await quranAPI.getTranslation(surahNumber);
+        console.log("Translation data received", translationData);
         
         setSurah(surahData);
         setTranslations(translationData || []);
@@ -107,11 +120,11 @@ export default function SurahPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <span>{surah.englishName}</span>
-            <span className="text-xl text-gold font-arabic">{surah.name}</span>
+            <span>{surah?.englishName}</span>
+            <span className="text-xl text-gold font-arabic">{surah?.name}</span>
           </h1>
           <p className="text-muted-foreground">
-            {surah.englishNameTranslation} • {surah.numberOfAyahs} verses • {surah.revelationType}
+            {surah?.englishNameTranslation} • {surah?.numberOfAyahs} verses • {surah?.revelationType}
           </p>
         </div>
         
@@ -133,7 +146,7 @@ export default function SurahPage() {
       </div>
       
       <div className="bg-card rounded-lg border border-border overflow-hidden">
-        {surah.ayahs && surah.ayahs.length > 0 ? (
+        {surah && surah.ayahs && surah.ayahs.length > 0 ? (
           surah.ayahs.map((ayah) => {
             // Ensure ayah has all required properties before rendering
             if (!ayah || !ayah.surah) return null;

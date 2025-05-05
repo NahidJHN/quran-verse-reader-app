@@ -47,6 +47,17 @@ export function DailyVerse() {
           throw new Error("Failed to load ayah data");
         }
         
+        // Set the surah property explicitly if it's missing
+        if (!ayah.surah) {
+          ayah.surah = {
+            number: surah.number,
+            name: surah.name,
+            englishName: surah.englishName,
+            englishNameTranslation: surah.englishNameTranslation,
+            revelationType: surah.revelationType
+          };
+        }
+        
         // Fetch the translation
         const translations = await quranAPI.getTranslation(surahNumber);
         const translationText = translations && translations.length > ayahIndex ? translations[ayahIndex] : null;
@@ -92,7 +103,6 @@ export function DailyVerse() {
   const handlePlay = () => {
     if (!dailyVerse || !dailyVerse.surah) return;
     
-    // Use the correct ayah number for audio playback
     console.log("Playing daily verse audio for surah:", dailyVerse.surah.number, "ayah:", dailyVerse.numberInSurah);
     play(dailyVerse.surah.number, dailyVerse.numberInSurah);
   };
@@ -122,7 +132,7 @@ export function DailyVerse() {
       <CardHeader className="bg-card/80 border-b border-border pb-2">
         <CardTitle className="flex items-center justify-between">
           <span>Verse of the Day</span>
-          {dailyVerse.surah && (
+          {dailyVerse && dailyVerse.surah && (
             <Link 
               to={`/surah/${dailyVerse.surah.number}`} 
               className="text-sm font-normal text-gold hover:text-gold-light transition-colors"
@@ -132,43 +142,45 @@ export function DailyVerse() {
           )}
         </CardTitle>
         <CardDescription>
-          {dailyVerse.surah ? `${dailyVerse.surah.englishNameTranslation} - Verse ${dailyVerse.numberInSurah}` : 'Loading...'}
+          {dailyVerse && dailyVerse.surah ? `${dailyVerse.surah.englishNameTranslation} - Verse ${dailyVerse.numberInSurah}` : 'Loading...'}
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-4">
-        <p className="arabic-text text-2xl mb-4 leading-loose">
-          {dailyVerse.text}
-        </p>
-        {translation && (
-          <p className="text-sm text-muted-foreground mt-2 mb-4 italic">
-            "{translation.text}"
+      {dailyVerse && (
+        <CardContent className="pt-4">
+          <p className="arabic-text text-2xl mb-4 leading-loose">
+            {dailyVerse.text}
           </p>
-        )}
-        <div className="flex justify-end gap-2 mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleBookmarkToggle}
-            className={isVerseBookmarked ? "text-gold border-gold" : ""}
-          >
-            {isVerseBookmarked ? (
-              <BookmarkCheck className="h-4 w-4 mr-2" />
-            ) : (
-              <Bookmark className="h-4 w-4 mr-2" />
-            )}
-            {isVerseBookmarked ? "Bookmarked" : "Bookmark"}
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handlePlay}
-            className="bg-gold hover:bg-gold-dark"
-          >
-            <Play className="h-4 w-4 mr-2" />
-            Listen
-          </Button>
-        </div>
-      </CardContent>
+          {translation && (
+            <p className="text-sm text-muted-foreground mt-2 mb-4 italic">
+              "{translation.text}"
+            </p>
+          )}
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBookmarkToggle}
+              className={isVerseBookmarked ? "text-gold border-gold" : ""}
+            >
+              {isVerseBookmarked ? (
+                <BookmarkCheck className="h-4 w-4 mr-2" />
+              ) : (
+                <Bookmark className="h-4 w-4 mr-2" />
+              )}
+              {isVerseBookmarked ? "Bookmarked" : "Bookmark"}
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handlePlay}
+              className="bg-gold hover:bg-gold-dark"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Listen
+            </Button>
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 }

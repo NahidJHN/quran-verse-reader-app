@@ -21,7 +21,7 @@ export function AyahView({ ayah, translation }: AyahViewProps) {
   
   // Safety check - if ayah or ayah.surah is undefined, return null
   if (!ayah || !ayah.surah) {
-    console.warn("Missing ayah data in AyahView");
+    console.warn("Missing ayah data in AyahView:", ayah);
     return null;
   }
   
