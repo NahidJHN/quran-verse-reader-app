@@ -35,13 +35,21 @@ export function DailyVerse() {
         // Fetch the surah to get its length
         const surah = await quranAPI.getSurah(surahNumber);
         
+        if (!surah || !surah.ayahs || surah.ayahs.length === 0) {
+          throw new Error("Failed to load surah data");
+        }
+        
         // Pick an ayah from the surah
         const ayahIndex = dayOfYear % surah.numberOfAyahs;
         const ayah = surah.ayahs[ayahIndex];
         
+        if (!ayah) {
+          throw new Error("Failed to load ayah data");
+        }
+        
         // Fetch the translation
         const translations = await quranAPI.getTranslation(surahNumber);
-        const translationText = translations[ayahIndex];
+        const translationText = translations && translations.length > ayahIndex ? translations[ayahIndex] : null;
         
         setDailyVerse(ayah);
         setTranslation(translationText);
@@ -61,7 +69,7 @@ export function DailyVerse() {
   }, [toast]);
   
   const handleBookmarkToggle = () => {
-    if (!dailyVerse) return;
+    if (!dailyVerse || !dailyVerse.surah) return;
     
     const surahNumber = dailyVerse.surah.number;
     const ayahNumber = dailyVerse.numberInSurah;
@@ -82,7 +90,7 @@ export function DailyVerse() {
   };
   
   const handlePlay = () => {
-    if (!dailyVerse) return;
+    if (!dailyVerse || !dailyVerse.surah) return;
     play(dailyVerse.surah.number, dailyVerse.numberInSurah);
   };
   
@@ -101,22 +109,27 @@ export function DailyVerse() {
     );
   }
   
-  const isVerseBookmarked = isBookmarked(dailyVerse.surah.number, dailyVerse.numberInSurah);
+  // Make sure dailyVerse.surah exists before trying to use it
+  const isVerseBookmarked = dailyVerse && dailyVerse.surah ? 
+    isBookmarked(dailyVerse.surah.number, dailyVerse.numberInSurah) : 
+    false;
   
   return (
     <Card className="bg-card overflow-hidden border-gold/20">
       <CardHeader className="bg-card/80 border-b border-border pb-2">
         <CardTitle className="flex items-center justify-between">
           <span>Verse of the Day</span>
-          <Link 
-            to={`/surah/${dailyVerse.surah.number}`} 
-            className="text-sm font-normal text-gold hover:text-gold-light transition-colors"
-          >
-            Surah {dailyVerse.surah.englishName}
-          </Link>
+          {dailyVerse.surah && (
+            <Link 
+              to={`/surah/${dailyVerse.surah.number}`} 
+              className="text-sm font-normal text-gold hover:text-gold-light transition-colors"
+            >
+              Surah {dailyVerse.surah.englishName}
+            </Link>
+          )}
         </CardTitle>
         <CardDescription>
-          {dailyVerse.surah.englishNameTranslation} - Verse {dailyVerse.numberInSurah}
+          {dailyVerse.surah ? `${dailyVerse.surah.englishNameTranslation} - Verse ${dailyVerse.numberInSurah}` : 'Loading...'}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-4">
