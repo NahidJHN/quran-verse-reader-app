@@ -21,8 +21,8 @@ export function SettingsForm() {
   } = useSettingsStore();
 
   const translations = [
-    { value: "en.asad", label: "Muhammad Asad (English)" },
-    { value: "en.bn.bengali", label: "Bangali" },
+    { value: "en.asad", label: "English" },
+    { value: "bn.bengali", label: "Bangali" },
   ];
 
   const reciters = [

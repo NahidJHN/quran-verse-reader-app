@@ -7,11 +7,14 @@ import { Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { SettingsForm } from "@/components/SettingsForm";
 import { useToast } from "@/hooks/use-toast";
+import { useSettingsStore } from "@/store/settingsStore";
 
 export default function SurahPage() {
   const { surahId } = useParams<{ surahId: string }>();
   const [searchParams] = useSearchParams();
   const ayahParam = searchParams.get("ayah");
+
+  const { translationLanguage } = useSettingsStore();
 
   const [surah, setSurah] = useState<SurahDetail | null>(null);
   const [translations, setTranslations] = useState<Translation[]>([]);
@@ -20,7 +23,6 @@ export default function SurahPage() {
   const { toast } = useToast();
 
   const targetAyahRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const fetchSurahData = async () => {
       if (!surahId) return;
@@ -43,8 +45,7 @@ export default function SurahPage() {
             revelationType: surahData.revelationType,
           };
         });
-
-        const translationData = await quranAPI.getTranslation(surahNumber);
+        const translationData = await quranAPI.getTranslation(surahNumber, translationLanguage);
         setSurah(surahData);
         setTranslations(translationData || []);
       } catch (err) {
@@ -60,7 +61,7 @@ export default function SurahPage() {
     };
 
     fetchSurahData();
-  }, [surahId, toast]);
+  }, [surahId, toast, translationLanguage]);
 
   useEffect(() => {
     if (ayahParam && !isLoading && targetAyahRef.current) {

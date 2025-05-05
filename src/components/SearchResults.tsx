@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { quranAPI, Ayah, Surah } from "@/services/quranAPI";
@@ -7,14 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Search as SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useSettingsStore } from "@/store/settingsStore";
 
 export function SearchResults() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<{ayah: Ayah, surah: Surah}[]>([]);
+  const [results, setResults] = useState<{ ayah: Ayah; surah: Surah }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [allSurahs, setAllSurahs] = useState<Surah[]>([]);
   const { toast } = useToast();
-  
+
+  const { translationLanguage } = useSettingsStore();
+
   useEffect(() => {
     const fetchSurahs = async () => {
       try {
@@ -29,73 +31,74 @@ export function SearchResults() {
         });
       }
     };
-    
+
     fetchSurahs();
   }, [toast]);
-  
+
   // Implement debounced search
   useEffect(() => {
     if (!query.trim() || query.length < 3) {
       setResults([]);
       return;
     }
-    
+
     const debounceTimeout = setTimeout(() => {
       performSearch(query);
     }, 500);
-    
+
     return () => {
       clearTimeout(debounceTimeout);
     };
   }, [query]);
-  
+
   const performSearch = async (searchQuery: string) => {
     if (!allSurahs.length) return;
-    
+
     setIsLoading(true);
     setResults([]);
-    
+
     try {
       // In a real app, you would use the API's search endpoint
       // For this demo, we'll search through surah names and first few ayahs of popular surahs
-      const searchResults: {ayah: Ayah, surah: Surah}[] = [];
-      
+      const searchResults: { ayah: Ayah; surah: Surah }[] = [];
+
       // Search in surah names
-      const matchedSurahs = allSurahs.filter(surah => 
-        surah.englishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        surah.englishNameTranslation.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchedSurahs = allSurahs.filter(
+        (surah) =>
+          surah.englishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          surah.englishNameTranslation.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      
+
       // For demo purposes, get first ayah of matched surahs
       for (const surah of matchedSurahs.slice(0, 3)) {
         try {
           const surahDetail = await quranAPI.getSurah(surah.number);
           searchResults.push({
             ayah: surahDetail.ayahs[0],
-            surah: surah
+            surah: surah,
           });
         } catch (error) {
           console.error(`Error fetching surah ${surah.number}:`, error);
         }
       }
-      
+
       // Search in some popular surahs (for demo purposes - in a real app you'd use a proper search API)
       const popularSurahs = [1, 36, 55, 67, 112];
       for (const surahNumber of popularSurahs) {
         try {
-          const surah = allSurahs.find(s => s.number === surahNumber);
+          const surah = allSurahs.find((s) => s.number === surahNumber);
           if (!surah) continue;
-          
+
           const surahDetail = await quranAPI.getSurah(surahNumber);
-          const translations = await quranAPI.getTranslation(surahNumber);
-          
+          const translations = await quranAPI.getTranslation(surahNumber, translationLanguage);
+
           // Find ayahs that match the search term in their translation
-          const matchingAyahs = translations.filter(
-            translation => translation.text.toLowerCase().includes(searchQuery.toLowerCase())
-          ).slice(0, 2); // Limit to 2 results per surah
-          
+          const matchingAyahs = translations
+            .filter((translation) => translation.text.toLowerCase().includes(searchQuery.toLowerCase()))
+            .slice(0, 2); // Limit to 2 results per surah
+
           for (const translation of matchingAyahs) {
-            const ayah = surahDetail.ayahs.find(a => a.numberInSurah === translation.numberInSurah);
+            const ayah = surahDetail.ayahs.find((a) => a.numberInSurah === translation.numberInSurah);
             if (ayah) {
               searchResults.push({ ayah, surah });
             }
@@ -104,7 +107,7 @@ export function SearchResults() {
           console.error(`Error searching in surah ${surahNumber}:`, error);
         }
       }
-      
+
       setResults(searchResults);
     } catch (error) {
       console.error("Error performing search:", error);
@@ -117,7 +120,7 @@ export function SearchResults() {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="relative">
@@ -130,13 +133,11 @@ export function SearchResults() {
           className="pl-10"
         />
       </div>
-      
+
       {query.length > 0 && query.length < 3 && (
-        <p className="text-center text-sm text-muted-foreground">
-          Please type at least 3 characters to search
-        </p>
+        <p className="text-center text-sm text-muted-foreground">Please type at least 3 characters to search</p>
       )}
-      
+
       {isLoading && (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -150,19 +151,19 @@ export function SearchResults() {
           ))}
         </div>
       )}
-      
+
       {!isLoading && query.length >= 3 && results.length === 0 && (
         <div className="text-center p-8">
           <p className="text-muted-foreground mb-4">No results found for "{query}"</p>
         </div>
       )}
-      
+
       {!isLoading && results.length > 0 && (
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Found {results.length} results for "{query}"
           </p>
-          
+
           {results.map((result, index) => (
             <Card key={index}>
               <CardHeader className="pb-2">
